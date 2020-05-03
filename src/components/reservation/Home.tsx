@@ -14,8 +14,7 @@ import {
     TableRow,
     Paper,
 } from '@material-ui/core';
-import EditIcon from '@material-ui/icons/Edit';
-import DeleteIcon from '@material-ui/icons/Delete';
+import CancelIcon from '@material-ui/icons/CancelPresentation';
 import CreateIcon from '@material-ui/icons/AddBox';
 import BackIcon from '@material-ui/icons/ArrowBack';
 import { Link } from 'react-router-dom';
@@ -51,31 +50,47 @@ const useStyles = makeStyles({
         marginRight: 10,
     },
 });
-export interface Type {
+
+interface Reservation {
     id: number;
-    name: string;
+    pickUp: string;
+    item: {
+        id: number;
+        name: string;
+        price: number;
+        rented: boolean;
+        type: {
+            id: number;
+            name: string;
+        };
+    };
+    client: {
+        id: number;
+        name: string;
+        email: string;
+    };
 }
 
-const TableType: React.FC = () => {
+const TableReservation: React.FC = () => {
     const classes = useStyles();
-    const [data, setData] = useState([] as Type[]);
+    const [data, setData] = useState([] as Reservation[]);
     useEffect(() => {
         getData();
     }, []);
     const getData = async (): Promise<void> => {
-        const clients = await api.get<Type[]>('types');
-        setData(clients.data);
+        const items = await api.get<Reservation[]>('reservations');
+        setData(items.data);
     };
     const deleteCustomer = async (event: any, id: number): Promise<void> => {
         event.persist();
-        await api.delete(`types/${id}`).then((data_) => {
+        await api.delete(`reservations/${id}`).then((data_) => {
             getData();
         });
     };
 
     return (
         <>
-            <Link to="/type/create">
+            <Link to="/reservation/create">
                 {' '}
                 <CreateIcon className={classes.marginRight} />{' '}
             </Link>
@@ -87,28 +102,30 @@ const TableType: React.FC = () => {
                 <Table className={classes.table} aria-label="simple table">
                     <TableHead>
                         <TableRow>
-                            <StyledTableCell>Name</StyledTableCell>
+                            <StyledTableCell>Reservado</StyledTableCell>
+                            <StyledTableCell>Item</StyledTableCell>
+                            <StyledTableCell>Para a data</StyledTableCell>
                             <StyledTableCell align="right">
                                 Ações
                             </StyledTableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {data.map((type) => (
-                            <StyledTableRow key={type.id}>
+                        {data.map((reservation) => (
+                            <StyledTableRow key={reservation.id}>
                                 <StyledTableCell component="th" scope="row">
-                                    {type.name}
+                                    {reservation.client.name}
+                                </StyledTableCell>
+                                <StyledTableCell component="th" scope="row">
+                                    {reservation.item.name}
+                                </StyledTableCell>
+                                <StyledTableCell component="th" scope="row">
+                                    {reservation.pickUp}
                                 </StyledTableCell>
                                 <StyledTableCell align="right">
-                                    <Link to={`/type/edit/${type.id}`}>
-                                        {' '}
-                                        <EditIcon
-                                            className={classes.marginRight}
-                                        />{' '}
-                                    </Link>
-                                    <DeleteIcon
+                                    <CancelIcon
                                         onClick={(e) =>
-                                            deleteCustomer(e, type.id)
+                                            deleteCustomer(e, reservation.id)
                                         }
                                     />
                                 </StyledTableCell>
@@ -121,4 +138,4 @@ const TableType: React.FC = () => {
     );
 };
 
-export default TableType;
+export default TableReservation;

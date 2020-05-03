@@ -29,47 +29,81 @@ const useStyles = makeStyles((theme: Theme) =>
         button: {
             margin: theme.spacing(1),
         },
+        textField: {
+            marginLeft: theme.spacing(1),
+            marginRight: theme.spacing(1),
+            width: 200,
+        },
     }),
 );
 
-interface Item {
-    name: string;
-    price: number;
-    type: {
-        id: number;
-        name: string;
-    };
-}
 interface Type {
     id: number;
     name: string;
 }
-interface OptionsItem {
-    value: number;
-    label: string;
+
+interface Item {
+    id: number;
+    name: string;
+    price: number;
+    type: Type;
 }
-const defaultValues: Item = {
-    name: '',
-    price: 0,
-    type: {
+
+interface Client {
+    id: number;
+    name: string;
+    email: string;
+}
+
+interface Reservation {
+    id: number;
+    pickUp: string;
+    item: Item;
+    client: Client;
+}
+
+const defaultValues: Reservation = {
+    id: 0,
+    pickUp: '',
+    client: {
         id: 0,
+        email: '',
         name: '',
     },
+    item: {
+        id: 0,
+        name: '',
+        price: 0,
+        type: {
+            id: 0,
+            name: '',
+        },
+    },
 };
-const CreateItem: React.FC = () => {
-    const [values, setValues] = useState(defaultValues as Item);
-    const [types, setType] = useState<Type[]>([]);
+const CreateReservation: React.FC = () => {
+    const [values, setValues] = useState(defaultValues as Reservation);
+    const [items, setItem] = useState<Item[]>([]);
+    const [clients, setClient] = useState<Client[]>([]);
 
     const classes = useStyles();
     const history = useHistory();
 
     useEffect(() => {
-        getTypes();
+        getItem();
     }, []);
 
-    const getTypes = async (): Promise<void> => {
-        const items = await api.get<Type[]>('types');
-        setType(items.data);
+    useEffect(() => {
+        getClient();
+    }, []);
+
+    const getClient = async (): Promise<void> => {
+        const response = await api.get<Client[]>('clients');
+        setClient(response.data);
+    };
+
+    const getItem = async (): Promise<void> => {
+        const response = await api.get<Item[]>('items');
+        setItem(response.data);
     };
 
     const handleChange = (event: any): void => {
@@ -82,7 +116,7 @@ const CreateItem: React.FC = () => {
 
     const handleSubmit = (event: any): void => {
         event.persist();
-        api.post(`items`, values).then((data) => [history.goBack()]);
+        api.post(`reservations`, values).then((data) => [history.goBack()]);
     };
 
     return (
@@ -90,36 +124,44 @@ const CreateItem: React.FC = () => {
             <div className={classes.wrapper}>
                 <TextField
                     id="outlined-input"
-                    name="name"
-                    label="Name"
-                    type="text"
-                    defaultValue={values.name}
+                    label="Data da reserva"
+                    type="date"
+                    defaultValue={new Date()}
                     className={classes.formInput}
-                    variant="outlined"
                     onChange={handleChange}
+                    InputLabelProps={{
+                        shrink: true,
+                    }}
+                    name="pickUp"
                 />
-                <TextField
-                    id="outlined-input"
-                    name="price"
-                    label="Price"
-                    type="text"
-                    defaultValue={values.price}
-                    className={classes.formInput}
-                    variant="outlined"
-                    onChange={handleChange}
-                />
-                <InputLabel id="label">Tipo</InputLabel>
+                <InputLabel id="label">Item</InputLabel>
                 <Select
                     id="outlined-input"
                     className={classes.formInput}
                     variant="outlined"
                     onChange={handleChange}
-                    name="type"
+                    name="item"
                 >
-                    {types.map((type) => {
+                    {items.map((item) => {
                         return (
-                            <MenuItem key={type.id} value={type.id}>
-                                {type.name}
+                            <MenuItem key={item.id} value={item.id}>
+                                {item.name}
+                            </MenuItem>
+                        );
+                    })}
+                </Select>
+                <InputLabel id="label">Clientes</InputLabel>
+                <Select
+                    id="outlined-input"
+                    className={classes.formInput}
+                    variant="outlined"
+                    onChange={handleChange}
+                    name="client"
+                >
+                    {clients.map((client) => {
+                        return (
+                            <MenuItem key={client.id} value={client.id}>
+                                {client.name}
                             </MenuItem>
                         );
                     })}
@@ -139,4 +181,4 @@ const CreateItem: React.FC = () => {
     );
 };
 
-export default withRouter(CreateItem);
+export default withRouter(CreateReservation);

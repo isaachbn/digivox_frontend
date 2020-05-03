@@ -26,17 +26,16 @@ const useStyles = makeStyles((theme: Theme) =>
     }),
 );
 
-export interface Type {
+interface Type {
     name: string;
 }
-export interface FormState {
-    [key: string]: any;
-    values: Type[];
-    submitSuccess: boolean;
-    loading: boolean;
-}
+
+const defaultValues: Type = {
+    name: '',
+};
+
 const EditType: React.FC = () => {
-    const [values, setValues] = useState({} as Type);
+    const [values, setValues] = useState(defaultValues as Type);
     const { id } = useParams();
 
     const classes = useStyles();
@@ -48,7 +47,7 @@ const EditType: React.FC = () => {
 
     const getData = async (): Promise<void> => {
         const customer = await api.get(`types/${id}`);
-        await setValues(customer.data);
+        setValues(customer.data);
     };
 
     const handleChange = (event: any): void => {

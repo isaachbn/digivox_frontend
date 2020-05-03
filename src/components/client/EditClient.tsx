@@ -26,18 +26,18 @@ const useStyles = makeStyles((theme: Theme) =>
     }),
 );
 
-export interface Client {
+interface Client {
     name: string;
     email: string;
 }
-export interface FormState {
-    [key: string]: any;
-    values: Client[];
-    submitSuccess: boolean;
-    loading: boolean;
-}
+
+const defaultValues: Client = {
+    name: '',
+    email: '',
+};
+
 const EditClient: React.FC = () => {
-    const [clients, setClient] = useState({} as Client);
+    const [clients, setClient] = useState(defaultValues as Client);
     const { id } = useParams();
 
     const classes = useStyles();

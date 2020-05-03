@@ -1,16 +1,43 @@
 import React, { useEffect, useState } from 'react';
-import { makeStyles } from '@material-ui/core/styles';
-import Table from '@material-ui/core/Table';
-import TableBody from '@material-ui/core/TableBody';
-import TableCell from '@material-ui/core/TableCell';
-import TableContainer from '@material-ui/core/TableContainer';
-import TableHead from '@material-ui/core/TableHead';
-import TableRow from '@material-ui/core/TableRow';
-import Paper from '@material-ui/core/Paper';
+import {
+    withStyles,
+    Theme,
+    createStyles,
+    makeStyles,
+} from '@material-ui/core/styles';
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Paper,
+} from '@material-ui/core';
 import AssignmentReturnIcon from '@material-ui/icons/AssignmentReturn';
-import DeleteIcon from '@material-ui/icons/Delete';
-import { Link } from 'react-router-dom';
 import api from '../services/api';
+
+const StyledTableCell = withStyles((theme: Theme) =>
+    createStyles({
+        head: {
+            backgroundColor: theme.palette.common.black,
+            color: theme.palette.common.white,
+        },
+        body: {
+            fontSize: 14,
+        },
+    }),
+)(TableCell);
+
+const StyledTableRow = withStyles((theme: Theme) =>
+    createStyles({
+        root: {
+            '&:nth-of-type(odd)': {
+                backgroundColor: theme.palette.background.default,
+            },
+        },
+    }),
+)(TableRow);
 
 const useStyles = makeStyles({
     table: {
@@ -20,6 +47,7 @@ const useStyles = makeStyles({
         marginRight: 10,
     },
 });
+
 interface Rent {
     id: number;
     withdrawal: string;
@@ -43,62 +71,108 @@ interface Rent {
 
 const SimpleTable: React.FC = () => {
     const classes = useStyles();
-    const [data, setData] = useState([] as Rent[]);
+    const [renteds, setRented] = useState([] as Rent[]);
+    const [delivereds, setDelivered] = useState([] as Rent[]);
     useEffect(() => {
-        getData();
+        getRented();
+        getDelivered();
     }, []);
-    const getData = async (): Promise<void> => {
-        const clients = await api.get<Rent[]>('rents');
-        setData(clients.data);
+    const getRented = async (): Promise<void> => {
+        const clients = await api.get<Rent[]>('rents?rented=true');
+        setRented(clients.data);
+    };
+    const getDelivered = async (): Promise<void> => {
+        const clients = await api.get<Rent[]>('rents?delivered=true');
+        setDelivered(clients.data);
     };
     const deleteCustomer = async (event: any, id: number): Promise<void> => {
         event.persist();
-        await api.delete(`rents/${id}`).then((data_) => {
-            getData();
+        await api.patch(`rents/${id}/deliver`).then((data_) => {
+            getRented();
+            getDelivered();
         });
     };
 
     return (
-        <TableContainer component={Paper}>
-            <Table className={classes.table} aria-label="simple table">
-                <TableHead>
-                    <TableRow>
-                        <TableCell>Item</TableCell>
-                        <TableCell>Categoria</TableCell>
-                        <TableCell>Client</TableCell>
-                        <TableCell>Valor</TableCell>
-                        <TableCell>Entrega</TableCell>
-                        <TableCell align="right">Devolver</TableCell>
-                    </TableRow>
-                </TableHead>
-                <TableBody>
-                    {data.map((rent) => (
-                        <TableRow key={rent.id}>
-                            <TableCell component="th" scope="row">
-                                {rent.item.name}
-                            </TableCell>
-                            <TableCell component="th" scope="row">
-                                {rent.item.type.name}
-                            </TableCell>
-                            <TableCell component="th" scope="row">
-                                {rent.client.name}
-                            </TableCell>
-                            <TableCell component="th" scope="row">
-                                {rent.item.price}
-                            </TableCell>
-                            <TableCell component="th" scope="row">
-                                {rent.delivery}
-                            </TableCell>
-                            <TableCell align="right">
-                                <AssignmentReturnIcon
-                                    onClick={(e) => deleteCustomer(e, rent.id)}
-                                />
-                            </TableCell>
+        <>
+            <h2>Itens a serem devolvidos</h2>
+            <TableContainer component={Paper}>
+                <Table className={classes.table} aria-label="simple table">
+                    <TableHead>
+                        <TableRow>
+                            <StyledTableCell>Item</StyledTableCell>
+                            <StyledTableCell>Categoria</StyledTableCell>
+                            <StyledTableCell>Client</StyledTableCell>
+                            <StyledTableCell>Valor</StyledTableCell>
+                            <StyledTableCell>Entrega Prevista</StyledTableCell>
+                            <StyledTableCell align="right">
+                                Receber
+                            </StyledTableCell>
                         </TableRow>
-                    ))}
-                </TableBody>
-            </Table>
-        </TableContainer>
+                    </TableHead>
+                    <TableBody>
+                        {renteds.map((rent) => (
+                            <StyledTableRow key={rent.id}>
+                                <StyledTableCell component="th" scope="row">
+                                    {rent.item.name}
+                                </StyledTableCell>
+                                <StyledTableCell component="th" scope="row">
+                                    {rent.item.type.name}
+                                </StyledTableCell>
+                                <StyledTableCell component="th" scope="row">
+                                    {rent.client.name}
+                                </StyledTableCell>
+                                <StyledTableCell component="th" scope="row">
+                                    {rent.item.price}
+                                </StyledTableCell>
+                                <StyledTableCell component="th" scope="row">
+                                    {rent.delivery}
+                                </StyledTableCell>
+                                <StyledTableCell align="right">
+                                    <AssignmentReturnIcon
+                                        onClick={(e) =>
+                                            deleteCustomer(e, rent.id)
+                                        }
+                                    />
+                                </StyledTableCell>
+                            </StyledTableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </TableContainer>
+
+            <h2>Itens alugados </h2>
+            <TableContainer component={Paper}>
+                <Table className={classes.table} aria-label="simple table">
+                    <TableHead>
+                        <TableRow>
+                            <StyledTableCell>Item</StyledTableCell>
+                            <StyledTableCell>Categoria</StyledTableCell>
+                            <StyledTableCell>Client</StyledTableCell>
+                            <StyledTableCell>Valor</StyledTableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {delivereds.map((rent) => (
+                            <StyledTableRow key={rent.id}>
+                                <StyledTableCell component="th" scope="row">
+                                    {rent.item.name}
+                                </StyledTableCell>
+                                <StyledTableCell component="th" scope="row">
+                                    {rent.item.type.name}
+                                </StyledTableCell>
+                                <StyledTableCell component="th" scope="row">
+                                    {rent.client.name}
+                                </StyledTableCell>
+                                <StyledTableCell component="th" scope="row">
+                                    {rent.item.price}
+                                </StyledTableCell>
+                            </StyledTableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </TableContainer>
+        </>
     );
 };
 

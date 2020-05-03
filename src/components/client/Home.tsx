@@ -1,18 +1,47 @@
 import React, { useEffect, useState } from 'react';
-import { makeStyles } from '@material-ui/core/styles';
-import Table from '@material-ui/core/Table';
-import TableBody from '@material-ui/core/TableBody';
-import TableCell from '@material-ui/core/TableCell';
-import TableContainer from '@material-ui/core/TableContainer';
-import TableHead from '@material-ui/core/TableHead';
-import TableRow from '@material-ui/core/TableRow';
-import Paper from '@material-ui/core/Paper';
+import {
+    makeStyles,
+    withStyles,
+    Theme,
+    createStyles,
+} from '@material-ui/core/styles';
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Paper,
+} from '@material-ui/core';
 import EditIcon from '@material-ui/icons/Edit';
 import DeleteIcon from '@material-ui/icons/Delete';
 import CreateIcon from '@material-ui/icons/AddBox';
 import BackIcon from '@material-ui/icons/ArrowBack';
 import { Link } from 'react-router-dom';
 import api from '../../services/api';
+
+const StyledTableCell = withStyles((theme: Theme) =>
+    createStyles({
+        head: {
+            backgroundColor: theme.palette.common.black,
+            color: theme.palette.common.white,
+        },
+        body: {
+            fontSize: 14,
+        },
+    }),
+)(TableCell);
+
+const StyledTableRow = withStyles((theme: Theme) =>
+    createStyles({
+        root: {
+            '&:nth-of-type(odd)': {
+                backgroundColor: theme.palette.background.default,
+            },
+        },
+    }),
+)(TableRow);
 
 const useStyles = makeStyles({
     table: {
@@ -28,7 +57,7 @@ export interface Client {
     email: string;
 }
 
-export default function SimpleTable() {
+const TableClient: React.FC = () => {
     const classes = useStyles();
     const [data, setData] = useState([] as Client[]);
     useEffect(() => {
@@ -59,21 +88,23 @@ export default function SimpleTable() {
                 <Table className={classes.table} aria-label="simple table">
                     <TableHead>
                         <TableRow>
-                            <TableCell>Name</TableCell>
-                            <TableCell align="right">Email</TableCell>
-                            <TableCell align="right" />
+                            <StyledTableCell>Name</StyledTableCell>
+                            <StyledTableCell>Email</StyledTableCell>
+                            <StyledTableCell align="right">
+                                Ações
+                            </StyledTableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
                         {data.map((client) => (
-                            <TableRow key={client.name}>
-                                <TableCell component="th" scope="row">
+                            <StyledTableRow key={client.id}>
+                                <StyledTableCell component="th" scope="row">
                                     {client.name}
-                                </TableCell>
-                                <TableCell align="right">
+                                </StyledTableCell>
+                                <StyledTableCell>
                                     {client.email}
-                                </TableCell>
-                                <TableCell align="right">
+                                </StyledTableCell>
+                                <StyledTableCell align="right">
                                     <Link to={`/client/edit/${client.id}`}>
                                         {' '}
                                         <EditIcon
@@ -85,12 +116,14 @@ export default function SimpleTable() {
                                             deleteCustomer(e, client.id)
                                         }
                                     />
-                                </TableCell>
-                            </TableRow>
+                                </StyledTableCell>
+                            </StyledTableRow>
                         ))}
                     </TableBody>
                 </Table>
             </TableContainer>
         </>
     );
-}
+};
+
+export default TableClient;

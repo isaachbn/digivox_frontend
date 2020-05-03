@@ -44,7 +44,7 @@ const CreateType: React.FC = () => {
     const classes = useStyles();
     const history = useHistory();
 
-    const handleChange = (event: any) => {
+    const handleChange = (event: any): void => {
         event.persist();
         setValues((values) => ({
             ...values,
@@ -52,7 +52,7 @@ const CreateType: React.FC = () => {
         }));
     };
 
-    const handleSubmit = (event: any) => {
+    const handleSubmit = (event: any): void => {
         event.persist();
         api.post(`types`, values).then((data) => [history.goBack()]);
     };

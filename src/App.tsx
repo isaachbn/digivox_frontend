@@ -11,6 +11,8 @@ import EditType from './components/type/EditType';
 import Item from './components/item/Home';
 import CreateItem from './components/item/CreateItem';
 import EditItem from './components/item/EditItem';
+import Reservation from './components/reservation/Home';
+import CreateReservation from './components/reservation/CreateReservation';
 
 const App: React.FC = () => {
     return (
@@ -29,6 +31,9 @@ const App: React.FC = () => {
                     <li>
                         <Link to="/type"> Manter Tipo Item </Link>
                     </li>
+                    <li>
+                        <Link to="/reservation"> Reservar de item </Link>
+                    </li>
                 </ul>
             </nav>
             <Switch>
@@ -42,6 +47,12 @@ const App: React.FC = () => {
                 <Route path="/item" exact component={Item} />
                 <Route path="/item/create" exact component={CreateItem} />
                 <Route path="/item/edit/:id" exact component={EditItem} />
+                <Route path="/reservation" exact component={Reservation} />
+                <Route
+                    path="/reservation/create"
+                    exact
+                    component={CreateReservation}
+                />
             </Switch>
         </div>
     );
